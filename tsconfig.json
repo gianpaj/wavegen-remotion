@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "lib": ["dom", "esnext"],
-    "module": "commonjs",
+    "module": "preserve",
     "target": "esnext",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "strict": true,
     "outDir": "dist",
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "bundler"
   },
   "include": ["src"]
 }
