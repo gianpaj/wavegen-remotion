@@ -4,7 +4,7 @@ import {BarPair} from './BarPair';
 import {centerPeakMultiplier, calculateBarWidth} from './utils';
 import {type WaveformProps} from './types';
 
-interface WaveformVisualizerProps extends Required<Omit<WaveformProps, 'audioFile'>> {
+interface WaveformVisualizerProps extends Required<Omit<WaveformProps, 'audioFile' | 'smoothing'>> {
   /** Amplitude values from visualizeAudio(), one per bar, range [0, 1] */
   amplitudes: number[];
 }

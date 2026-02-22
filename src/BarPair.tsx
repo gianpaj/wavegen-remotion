@@ -45,7 +45,6 @@ export const BarPair: React.FC<BarPairProps> = ({
         opacity={reflectionOpacity}
         rx={borderRadius}
         ry={borderRadius}
-        transform={`scale(1,-1) translate(0,${-2 * baseline})`}
       />
     </g>
   );

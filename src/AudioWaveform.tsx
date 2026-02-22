@@ -54,7 +54,6 @@ export const AudioWaveform: React.FC<WaveformProps> = (rawProps) => {
         barGap={barGap}
         barBorderRadius={barBorderRadius}
         centerPeakStrength={centerPeakStrength}
-        smoothing={smoothing}
         reflectionOpacity={reflectionOpacity}
         backgroundColor={backgroundColor}
       />
