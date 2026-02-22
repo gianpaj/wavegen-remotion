@@ -1,0 +1,26 @@
+{
+  "name": "remotion-audio-video-waveform",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "studio": "bunx remotionb studio src/index.ts",
+    "render": "bunx remotionb render AudioWaveform",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.427",
+    "@remotion/media-utils": "^4.0.427",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "remotion": "^4.0.427"
+  }
+}
