@@ -1,29 +1,38 @@
-# Audio Waveform Visualizer
+# remotion-audio-video-waveform
 
-A Remotion video template that renders an animated audio waveform visualizer.
+Remotion template that turns a voice recording into an animated waveform video — bars animate with speech dynamics, taller in the centre, tapering toward the edges.
 
 ## Setup
 
-1. Place your audio file in `public/audio.mp3`
-2. Run `bun run studio` to preview in Remotion Studio
+```bash
+bun install
+cp your-audio.mp3 public/audio.mp3
+bun run studio        # preview at localhost:3000
+```
 
 ## Render
 
 ```bash
 bunx remotionb render AudioWaveform out/waveform.mp4 \
-  --props='{"audioFile":"audio.mp3","barCount":64,"barColor":"#22c55e"}'
+  --props='{"audioFile":"audio.mp3","barColor":"#22c55e"}'
 ```
 
 ## Props
 
 | Prop | Default | Description |
 |------|---------|-------------|
-| audioFile | required | Path in public/ or URL |
-| barCount | 64 | Number of bars (power of 2) |
-| barColor | #22c55e | Bar fill color |
-| barGap | 4 | Gap between bars (px) |
-| barBorderRadius | 2 | Corner radius |
-| centerPeakStrength | 0.7 | Bell curve taper (0–1) |
-| smoothing | 0.6 | Smoothing on/off threshold |
-| reflectionOpacity | 0.3 | Reflection opacity |
-| backgroundColor | #000000 | Background color |
+| `audioFile` | required | Filename in `public/`, or a URL |
+| `barCount` | `64` | Number of bars (use a power of 2) |
+| `barColor` | `#22c55e` | Bar fill colour (any CSS colour) |
+| `barGap` | `4` | Gap between bars in px |
+| `barBorderRadius` | `2` | Bar corner radius in px |
+| `centerPeakStrength` | `0.7` | Bell-curve taper — `0` flat, `1` edges go to zero |
+| `reflectionOpacity` | `0.3` | Opacity of the mirror reflection below the baseline |
+| `backgroundColor` | `#000000` | Background colour |
+| `time` | `0.4` | Seconds of audio shown at once — lower is snappier |
+| `speed` | `4` | Cross-fade speed — higher is more reactive |
+| `oversample` | `4` | Envelope resolution — lower is smoother |
+
+## How it works
+
+Each bar represents a short time slice of amplitude (not a frequency bin). The component reads raw PCM samples from `useAudioData`, normalises by standard deviation, applies a sigmoid compressor (`1.9 × (sigmoid(2.5x) − 0.5)`) for natural dynamics, then cross-fades between adjacent frames with volume-dependent speed — technique adapted from [seewav](https://github.com/adefossez/seewav).
