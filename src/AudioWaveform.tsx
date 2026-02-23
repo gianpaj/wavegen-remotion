@@ -32,16 +32,22 @@ export const AudioWaveform: React.FC<WaveformProps> = (props) => {
     );
   }
 
-  // visualizeAudio returns barCount amplitude values in range [0, 1]
-  // numberOfSamples must be a power of 2; barCount prop should satisfy this
-  // smoothing in @remotion/media-utils is a boolean; convert our numeric prop (> 0 means enable smoothing)
-  const amplitudes = visualizeAudio({
+  // Get half the samples, then mirror — ensures all bars have data and pattern is symmetric
+  const halfCount = Math.max(16, Math.floor(barCount / 2));
+  // Clamp to valid power-of-2 values that visualizeAudio accepts
+  const validSamples = ([16, 32, 64, 128] as const).reduce((prev, curr) =>
+    Math.abs(curr - halfCount) < Math.abs(prev - halfCount) ? curr : prev
+  );
+
+  const rawAmplitudes = visualizeAudio({
     fps,
     frame,
     audioData,
-    numberOfSamples: barCount,
+    numberOfSamples: validSamples,
     smoothing: smoothing > 0,
   });
+  // Mirror: [sN-1...s0, s0...sN-1] puts lowest freq (most speech energy) in center
+  const amplitudes = [...rawAmplitudes.slice().reverse(), ...rawAmplitudes];
 
   return (
     <>
