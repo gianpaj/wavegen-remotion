@@ -4,8 +4,8 @@ import {BarPair} from './BarPair';
 import {centerPeakMultiplier, calculateBarWidth} from './utils';
 import {type WaveformProps} from './types';
 
-interface WaveformVisualizerProps extends Required<Omit<WaveformProps, 'audioFile' | 'smoothing'>> {
-  /** Amplitude values from visualizeAudio(), one per bar, range [0, 1] */
+interface WaveformVisualizerProps extends Required<Omit<WaveformProps, 'audioFile' | 'smoothing' | 'time' | 'speed' | 'oversample' | 'gain'>> {
+  /** Amplitude values from time-domain analysis, one per bar, range [0, 1] */
   amplitudes: number[];
 }
 
@@ -22,7 +22,6 @@ export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = (props) => 
     centerPeakStrength,
     reflectionOpacity,
     backgroundColor,
-    gain,
   } = props;
 
   const {width, height} = useVideoConfig();
@@ -41,7 +40,7 @@ export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = (props) => 
 
       {amplitudes.map((amplitude, i) => {
         const envelope = centerPeakMultiplier(i, barCount, centerPeakStrength);
-        const barHeight = Math.min(amplitude * gain, 1.0) * maxBarHeight * envelope;
+        const barHeight = amplitude * maxBarHeight * envelope;
         const x = SIDE_PADDING + i * (barWidth + barGap);
 
         return (

@@ -1,18 +1,22 @@
 import {test, expect} from 'bun:test';
-import {centerPeakMultiplier, calculateBarWidth} from './utils';
+import {
+  centerPeakMultiplier,
+  calculateBarWidth,
+  sigmoid,
+  interpole,
+  computeBarAmplitude,
+} from './utils';
 
-// centerPeakMultiplier tests
-test('centerPeakMultiplier returns 1.0 for the center bar (odd count)', () => {
-  // barIndex=2, total=5 => center
-  const result = centerPeakMultiplier(2, 5, 0.7);
+// centerPeakMultiplier (Hanning-based)
+test('centerPeakMultiplier returns 1.0 for the center bar', () => {
+  // barIndex=2, total=5 => center (index 2 of 0-4)
+  const result = centerPeakMultiplier(2, 5, 1.0);
   expect(result).toBeCloseTo(1.0, 3);
 });
 
-test('centerPeakMultiplier returns reduced value for edge bar', () => {
-  // barIndex=0, total=5 => far from center
-  const result = centerPeakMultiplier(0, 5, 0.7);
-  expect(result).toBeLessThan(0.5);
-  expect(result).toBeGreaterThan(0);
+test('centerPeakMultiplier returns 0 for edge bar at full strength', () => {
+  expect(centerPeakMultiplier(0, 5, 1.0)).toBeCloseTo(0, 3);
+  expect(centerPeakMultiplier(4, 5, 1.0)).toBeCloseTo(0, 3);
 });
 
 test('centerPeakMultiplier with strength=0 returns 1.0 for all bars', () => {
@@ -21,16 +25,14 @@ test('centerPeakMultiplier with strength=0 returns 1.0 for all bars', () => {
   expect(centerPeakMultiplier(9, 10, 0)).toBeCloseTo(1.0, 3);
 });
 
-test('centerPeakMultiplier with strength=1 returns ~0 for edge bars', () => {
-  const result = centerPeakMultiplier(0, 100, 1.0);
-  expect(result).toBeCloseTo(0, 1);
+test('centerPeakMultiplier partial strength gives value between 0 and 1 for edge', () => {
+  const result = centerPeakMultiplier(0, 10, 0.7);
+  expect(result).toBeGreaterThan(0);
+  expect(result).toBeLessThan(1);
 });
 
-// calculateBarWidth tests
+// calculateBarWidth
 test('calculateBarWidth returns correct width', () => {
-  // totalWidth=1920, padding=80 each side, barCount=10, gap=4
-  // available = 1920 - 80*2 - 10*4 = 1920 - 160 - 40 = 1720
-  // width = 1720 / 10 = 172
   const result = calculateBarWidth(1920, 10, 4, 80);
   expect(result).toBeCloseTo(172, 1);
 });
@@ -38,4 +40,45 @@ test('calculateBarWidth returns correct width', () => {
 test('calculateBarWidth handles zero gap', () => {
   const result = calculateBarWidth(1000, 10, 0, 0);
   expect(result).toBeCloseTo(100, 1);
+});
+
+// sigmoid
+test('sigmoid(0) returns 0.5', () => {
+  expect(sigmoid(0)).toBeCloseTo(0.5, 5);
+});
+
+test('sigmoid returns values in (0, 1)', () => {
+  expect(sigmoid(100)).toBeCloseTo(1, 3);
+  expect(sigmoid(-100)).toBeCloseTo(0, 3);
+});
+
+// interpole
+test('interpole interpolates correctly at midpoint', () => {
+  const result = interpole(0, 0, 10, 10, 5);
+  expect(result).toBeCloseTo(5, 5);
+});
+
+test('interpole returns y1 at x1 and y2 at x2', () => {
+  expect(interpole(-6, 0.5, 0, 2, -6)).toBeCloseTo(0.5, 5);
+  expect(interpole(-6, 0.5, 0, 2, 0)).toBeCloseTo(2, 5);
+});
+
+// computeBarAmplitude
+test('computeBarAmplitude returns 0 for silent audio', () => {
+  const silence = new Float32Array(1000).fill(0);
+  const result = computeBarAmplitude([silence], 500, 100);
+  expect(result).toBeCloseTo(0, 3);
+});
+
+test('computeBarAmplitude returns positive value for loud audio', () => {
+  const loud = new Float32Array(1000).fill(1.0);
+  const result = computeBarAmplitude([loud], 500, 100);
+  expect(result).toBeGreaterThan(0);
+  expect(result).toBeLessThanOrEqual(1.0);
+});
+
+test('computeBarAmplitude handles out-of-bounds centerSample gracefully', () => {
+  const samples = new Float32Array(100).fill(0.5);
+  expect(() => computeBarAmplitude([samples], -50, 100)).not.toThrow();
+  expect(() => computeBarAmplitude([samples], 200, 100)).not.toThrow();
 });

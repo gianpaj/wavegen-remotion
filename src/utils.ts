@@ -1,33 +1,20 @@
 /**
- * Returns a multiplier in [0, 1] that applies a bell-curve (Gaussian) envelope
- * so bars near the center of the array get a higher max height than edge bars.
- *
- * @param barIndex - 0-based index of this bar
- * @param total    - total number of bars
- * @param strength - 0 = all bars equal (envelope flat), 1 = edge bars nearly zero
+ * Returns a multiplier using a Hanning window blended by `strength`.
+ * strength=0: all bars equal height (flat)
+ * strength=1: full Hanning window (center peaks, edges = 0)
  */
 export function centerPeakMultiplier(
   barIndex: number,
   total: number,
   strength: number,
 ): number {
-  if (strength === 0) return 1;
-  // Normalize position to [-1, 1] where 0 = center
-  const center = (total - 1) / 2;
-  const normalized = (barIndex - center) / center; // -1 to 1
-  // Gaussian: e^(-k * x^2). k controls how sharp the peak is.
-  const k = strength * 3; // tuned so strength=1 gives ~0 at edges
-  return Math.exp(-k * normalized * normalized);
+  const hanning = 0.5 * (1 - Math.cos((2 * Math.PI * barIndex) / (total - 1)));
+  return 1 - strength + strength * hanning;
 }
 
 /**
  * Calculates the pixel width of each bar so all bars + gaps fit within totalWidth
  * with equal padding on each side.
- *
- * @param totalWidth - canvas width in pixels (e.g. 1920)
- * @param barCount   - number of bars
- * @param barGap     - gap between bars in pixels
- * @param padding    - horizontal padding on each side in pixels
  */
 export function calculateBarWidth(
   totalWidth: number,
@@ -37,4 +24,64 @@ export function calculateBarWidth(
 ): number {
   const available = totalWidth - padding * 2 - barCount * barGap;
   return available / barCount;
+}
+
+/** Logistic sigmoid function */
+export function sigmoid(x: number): number {
+  return 1 / (1 + Math.exp(-x));
+}
+
+/** Linear interpolation between two points */
+export function interpole(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  x: number,
+): number {
+  return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
+}
+
+/**
+ * Compute amplitude for a single bar by averaging positive samples
+ * in a window centered on `centerSample`, then applying the seewav
+ * sigmoid compressor: 1.9 * (sigmoid(2.5 * mean) - 0.5)
+ */
+export function computeBarAmplitude(
+  channelWaveforms: Float32Array[],
+  centerSample: number,
+  windowSize: number,
+): number {
+  const len = channelWaveforms[0].length;
+  const start = Math.max(0, Math.floor(centerSample - windowSize / 2));
+  const end = Math.min(len, Math.floor(centerSample + windowSize / 2));
+  if (end <= start) return 0;
+
+  const numChannels = channelWaveforms.length;
+  let sum = 0;
+  for (let i = start; i < end; i++) {
+    let mono = 0;
+    for (let c = 0; c < numChannels; c++) mono += channelWaveforms[c][i];
+    mono /= numChannels;
+    if (mono > 0) sum += mono;
+  }
+  const mean = sum / (end - start);
+  return Math.max(0, 1.9 * (sigmoid(2.5 * mean) - 0.5));
+}
+
+/**
+ * Compute one "page" of barCount amplitude values starting at
+ * sample position `offset * barCount * stride`.
+ */
+export function getEnvBars(
+  channelWaveforms: Float32Array[],
+  offset: number,
+  barCount: number,
+  stride: number,
+  windowSize: number,
+): number[] {
+  return Array.from({length: barCount}, (_, i) => {
+    const centerSample = (offset * barCount + i) * stride;
+    return computeBarAmplitude(channelWaveforms, centerSample, windowSize);
+  });
 }

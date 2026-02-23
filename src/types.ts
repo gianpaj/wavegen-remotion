@@ -13,14 +13,16 @@ export const waveformPropsSchema = z.object({
   barBorderRadius: z.number().min(0).max(20).describe('Bar corner radius in pixels'),
   /** Bell-curve taper strength toward edges. 0 = flat, 1 = strong taper */
   centerPeakStrength: z.number().min(0).max(1).describe('Center peak taper strength (0 = flat, 1 = maximum taper)'),
-  /** Smoothing: 0 = off, any positive value = on */
-  smoothing: z.number().min(0).max(1).describe('Smoothing (0 = off, >0 = on)'),
   /** Opacity of the mirrored reflection below the baseline */
   reflectionOpacity: z.number().min(0).max(1).describe('Reflection opacity (0 = none, 1 = full)'),
   /** Background fill color */
   backgroundColor: z.string().describe('Background color (CSS color)'),
-  /** Amplitude gain — increase for quiet recordings (default: 5) */
-  gain: z.number().min(0.5).max(20).describe('Amplitude gain — increase for quiet recordings (default: 5)'),
+  /** Seconds of audio shown at once — lower = snappier (default: 0.4) */
+  time: z.number().min(0.1).max(2.0).describe('Seconds of audio shown at once — lower = snappier (default: 0.4)'),
+  /** Cross-fade speed — higher = more reactive (default: 4) */
+  speed: z.number().min(0.5).max(10).describe('Cross-fade speed — higher = more reactive (default: 4)'),
+  /** Envelope detail — lower = smoother (default: 4) */
+  oversample: z.number().int().min(1).max(8).describe('Envelope detail — lower = smoother (default: 4)'),
 });
 
 export type WaveformProps = z.infer<typeof waveformPropsSchema>;
@@ -32,8 +34,9 @@ export const defaultWaveformProps: WaveformProps = {
   barGap: 4,
   barBorderRadius: 2,
   centerPeakStrength: 0.7,
-  smoothing: 0.6,
   reflectionOpacity: 0.3,
   backgroundColor: '#000000',
-  gain: 5,
+  time: 0.4,
+  speed: 4,
+  oversample: 4,
 };
