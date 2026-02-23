@@ -12,27 +12,23 @@ interface WaveformVisualizerProps extends Required<Omit<WaveformProps, 'audioFil
 const SIDE_PADDING = 80;
 const MAX_BAR_HEIGHT_RATIO = 0.45; // bars reach up to 45% of canvas height
 
-export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
-  amplitudes,
-  barCount,
-  barColor,
-  barGap,
-  barBorderRadius,
-  centerPeakStrength,
-  reflectionOpacity,
-  backgroundColor,
-}) => {
+export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = (props) => {
+  const {
+    amplitudes,
+    barCount,
+    barColor,
+    barGap,
+    barBorderRadius,
+    centerPeakStrength,
+    reflectionOpacity,
+    backgroundColor,
+    gain,
+  } = props;
+
   const {width, height} = useVideoConfig();
   const baseline = height / 2;
   const maxBarHeight = height * MAX_BAR_HEIGHT_RATIO;
   const barWidth = calculateBarWidth(width, barCount, barGap, SIDE_PADDING);
-
-  // Normalize so the loudest bar fills most of the available space.
-  // Only normalize if the signal is above a noise floor (avoids amplifying silence).
-  const NOISE_FLOOR = 0.05;
-  const maxAmplitude = Math.max(...amplitudes);
-  const normalizationFactor = maxAmplitude > NOISE_FLOOR ? 1 / maxAmplitude : 0;
-  const normalizedAmplitudes = amplitudes.map(a => a * normalizationFactor);
 
   return (
     <svg
@@ -43,9 +39,9 @@ export const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
       {/* Background */}
       <rect x={0} y={0} width={width} height={height} fill={backgroundColor} />
 
-      {normalizedAmplitudes.map((amplitude, i) => {
+      {amplitudes.map((amplitude, i) => {
         const envelope = centerPeakMultiplier(i, barCount, centerPeakStrength);
-        const barHeight = amplitude * maxBarHeight * envelope;
+        const barHeight = Math.min(amplitude * gain, 1.0) * maxBarHeight * envelope;
         const x = SIDE_PADDING + i * (barWidth + barGap);
 
         return (

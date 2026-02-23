@@ -19,6 +19,8 @@ export const waveformPropsSchema = z.object({
   reflectionOpacity: z.number().min(0).max(1).describe('Reflection opacity (0 = none, 1 = full)'),
   /** Background fill color */
   backgroundColor: z.string().describe('Background color (CSS color)'),
+  /** Amplitude gain — increase for quiet recordings (default: 5) */
+  gain: z.number().min(0.5).max(20).describe('Amplitude gain — increase for quiet recordings (default: 5)'),
 });
 
 export type WaveformProps = z.infer<typeof waveformPropsSchema>;
@@ -33,4 +35,5 @@ export const defaultWaveformProps: WaveformProps = {
   smoothing: 0.6,
   reflectionOpacity: 0.3,
   backgroundColor: '#000000',
+  gain: 5,
 };

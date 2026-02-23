@@ -15,6 +15,7 @@ export const AudioWaveform: React.FC<WaveformProps> = (props) => {
     smoothing,
     reflectionOpacity,
     backgroundColor,
+    gain,
   } = props;
 
   const frame = useCurrentFrame();
@@ -61,6 +62,7 @@ export const AudioWaveform: React.FC<WaveformProps> = (props) => {
         centerPeakStrength={centerPeakStrength}
         reflectionOpacity={reflectionOpacity}
         backgroundColor={backgroundColor}
+        gain={gain}
       />
     </>
   );

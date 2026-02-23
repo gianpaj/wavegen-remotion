@@ -20,4 +20,10 @@ test('defaultWaveformProps has all required fields', () => {
   expect(defaultWaveformProps.audioFile).toBe('audio.mp3');
   expect(defaultWaveformProps.barCount).toBe(64);
   expect(defaultWaveformProps.barColor).toBe('#22c55e');
+  expect(defaultWaveformProps.gain).toBe(5);
+});
+
+test('waveformPropsSchema rejects gain out of range', () => {
+  const result = waveformPropsSchema.safeParse({...defaultWaveformProps, gain: 25});
+  expect(result.success).toBe(false);
 });
