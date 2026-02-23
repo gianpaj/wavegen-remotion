@@ -1,6 +1,10 @@
-# remotion-audio-video-waveform
+# wavegen Remotion
 
 Remotion template that turns a voice recording into an animated waveform video — bars animate with speech dynamics, taller in the centre, tapering toward the edges.
+
+> [!NOTE]
+> Most of the code was written Claude Code.
+> See [docs/plans/2026-02-22-audio-waveform-implementation.md](docs/plans/2026-02-22-audio-waveform-implementation.md) for initial plan and design doc [docs/plans/2026-02-22-audio-waveform-design.md](docs/plans/2026-02-22-audio-waveform-design.md)
 
 ![Preview](preview.png)
 
