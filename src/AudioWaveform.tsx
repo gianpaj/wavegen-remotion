@@ -2,10 +2,9 @@ import React from 'react';
 import {Audio, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 import {WaveformVisualizer} from './WaveformVisualizer';
-import {defaultWaveformProps, type WaveformProps} from './types';
+import {type WaveformProps} from './types';
 
-export const AudioWaveform: React.FC<WaveformProps> = (rawProps) => {
-  const props = {...defaultWaveformProps, ...rawProps};
+export const AudioWaveform: React.FC<WaveformProps> = (props) => {
   const {
     audioFile,
     barCount,
