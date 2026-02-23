@@ -11,11 +11,14 @@
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "@vitejs/plugin-react": "^5.1.4",
+    "typescript": "^5.9.3",
+    "vite": "^7"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.427",
     "@remotion/media-utils": "^4.0.427",
+    "@remotion/player": "^4.0.427",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "remotion": "^4.0.427",
