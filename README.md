@@ -7,6 +7,7 @@ Remotion template that turns a voice recording into an animated waveform video â
 > See [docs/plans/2026-02-22-audio-waveform-implementation.md](docs/plans/2026-02-22-audio-waveform-implementation.md) for initial plan and design doc [docs/plans/2026-02-22-audio-waveform-design.md](docs/plans/2026-02-22-audio-waveform-design.md)
 
 ![Preview](preview.png)
+**[Live demo â†’](https://gianpaj.github.io/wavegen-remotion/)**
 
 ## Setup
 
