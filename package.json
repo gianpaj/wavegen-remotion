@@ -5,7 +5,9 @@
   "scripts": {
     "studio": "bunx remotionb studio src/index.ts",
     "render": "bunx remotionb render AudioWaveform",
-    "test": "bun test"
+    "test": "bun test",
+    "web": "vite",
+    "build:web": "vite build"
   },
   "devDependencies": {
     "@types/bun": "latest",
