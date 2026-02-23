@@ -2,6 +2,8 @@
 
 Remotion template that turns a voice recording into an animated waveform video — bars animate with speech dynamics, taller in the centre, tapering toward the edges.
 
+![Preview](preview.png)
+
 ## Setup
 
 ```bash
