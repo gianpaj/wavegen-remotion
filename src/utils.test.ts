@@ -5,6 +5,7 @@ import {
   sigmoid,
   interpole,
   computeBarAmplitude,
+  computeAudioStd,
 } from './utils';
 
 // centerPeakMultiplier (Hanning-based)
@@ -66,19 +67,34 @@ test('interpole returns y1 at x1 and y2 at x2', () => {
 // computeBarAmplitude
 test('computeBarAmplitude returns 0 for silent audio', () => {
   const silence = new Float32Array(1000).fill(0);
-  const result = computeBarAmplitude([silence], 500, 100);
+  const result = computeBarAmplitude([silence], 500, 100, 1);
   expect(result).toBeCloseTo(0, 3);
 });
 
 test('computeBarAmplitude returns positive value for loud audio', () => {
   const loud = new Float32Array(1000).fill(1.0);
-  const result = computeBarAmplitude([loud], 500, 100);
+  const result = computeBarAmplitude([loud], 500, 100, 1);
   expect(result).toBeGreaterThan(0);
   expect(result).toBeLessThanOrEqual(1.0);
 });
 
 test('computeBarAmplitude handles out-of-bounds centerSample gracefully', () => {
   const samples = new Float32Array(100).fill(0.5);
-  expect(() => computeBarAmplitude([samples], -50, 100)).not.toThrow();
-  expect(() => computeBarAmplitude([samples], 200, 100)).not.toThrow();
+  expect(() => computeBarAmplitude([samples], -50, 100, 1)).not.toThrow();
+  expect(() => computeBarAmplitude([samples], 200, 100, 1)).not.toThrow();
+});
+
+// computeAudioStd
+test('computeAudioStd returns ~1 for unit normal-ish signal', () => {
+  // A sine wave with amplitude 1 has std ≈ 0.707
+  const sine = new Float32Array(44100).map((_, i) => Math.sin(2 * Math.PI * 440 * i / 44100));
+  const std = computeAudioStd([sine], 1);
+  expect(std).toBeGreaterThan(0.5);
+  expect(std).toBeLessThan(1.0);
+});
+
+test('computeAudioStd returns small value for near-silence', () => {
+  const quiet = new Float32Array(1000).fill(0.001);
+  const std = computeAudioStd([quiet], 1);
+  expect(std).toBeLessThan(0.01);
 });

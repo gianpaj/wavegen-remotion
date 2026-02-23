@@ -3,7 +3,7 @@ import {Audio, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {useAudioData} from '@remotion/media-utils';
 import {WaveformVisualizer} from './WaveformVisualizer';
 import {type WaveformProps} from './types';
-import {sigmoid, interpole, getEnvBars} from './utils';
+import {sigmoid, interpole, getEnvBars, computeAudioStd} from './utils';
 
 export const AudioWaveform: React.FC<WaveformProps> = (props) => {
   const {
@@ -32,6 +32,8 @@ export const AudioWaveform: React.FC<WaveformProps> = (props) => {
 
   const {channelWaveforms, sampleRate} = audioData;
 
+  const audioStd = computeAudioStd(channelWaveforms);
+
   // Each bar covers (time / barCount) seconds of audio
   const windowSize = Math.max(1, Math.floor(sampleRate * time / barCount));
   // Stride between envelope samples: windowSize / oversample
@@ -44,8 +46,8 @@ export const AudioWaveform: React.FC<WaveformProps> = (props) => {
   const loc = pos - off; // fractional position within current page, 0→1
 
   // Compute two adjacent pages for cross-fade
-  const env1 = getEnvBars(channelWaveforms, off, barCount, stride, windowSize);
-  const env2 = getEnvBars(channelWaveforms, off + 1, barCount, stride, windowSize);
+  const env1 = getEnvBars(channelWaveforms, off, barCount, stride, windowSize, audioStd);
+  const env2 = getEnvBars(channelWaveforms, off + 1, barCount, stride, windowSize, audioStd);
 
   // Volume-dependent speedup: loud upcoming audio transitions faster (seewav technique)
   const maxVol = Math.log10(1e-4 + Math.max(...env2)) * 10; // dB

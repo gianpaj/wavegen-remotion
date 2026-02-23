@@ -43,6 +43,33 @@ export function interpole(
 }
 
 /**
+ * Estimate the standard deviation of the audio by sampling every `step` samples.
+ * Equivalent to Python's wav.std() but fast for long files.
+ */
+export function computeAudioStd(
+  channelWaveforms: Float32Array[],
+  step = 50,
+): number {
+  const len = channelWaveforms[0].length;
+  const numChannels = channelWaveforms.length;
+  let sum = 0;
+  let sumSq = 0;
+  let count = 0;
+  for (let i = 0; i < len; i += step) {
+    let mono = 0;
+    for (let c = 0; c < numChannels; c++) mono += channelWaveforms[c][i];
+    mono /= numChannels;
+    sum += mono;
+    sumSq += mono * mono;
+    count++;
+  }
+  if (count === 0) return 1;
+  const mean = sum / count;
+  const variance = sumSq / count - mean * mean;
+  return Math.sqrt(Math.max(variance, 1e-10));
+}
+
+/**
  * Compute amplitude for a single bar by averaging positive samples
  * in a window centered on `centerSample`, then applying the seewav
  * sigmoid compressor: 1.9 * (sigmoid(2.5 * mean) - 0.5)
@@ -51,6 +78,7 @@ export function computeBarAmplitude(
   channelWaveforms: Float32Array[],
   centerSample: number,
   windowSize: number,
+  audioStd: number,
 ): number {
   const len = channelWaveforms[0].length;
   const start = Math.max(0, Math.floor(centerSample - windowSize / 2));
@@ -63,7 +91,8 @@ export function computeBarAmplitude(
     let mono = 0;
     for (let c = 0; c < numChannels; c++) mono += channelWaveforms[c][i];
     mono /= numChannels;
-    if (mono > 0) sum += mono;
+    const normalized = mono / audioStd;
+    if (normalized > 0) sum += normalized;
   }
   const mean = sum / (end - start);
   return Math.max(0, 1.9 * (sigmoid(2.5 * mean) - 0.5));
@@ -79,9 +108,10 @@ export function getEnvBars(
   barCount: number,
   stride: number,
   windowSize: number,
+  audioStd: number,
 ): number[] {
   return Array.from({length: barCount}, (_, i) => {
     const centerSample = (offset * barCount + i) * stride;
-    return computeBarAmplitude(channelWaveforms, centerSample, windowSize);
+    return computeBarAmplitude(channelWaveforms, centerSample, windowSize, audioStd);
   });
 }
